@@ -1,0 +1,29 @@
+#!/bin/bash
+
+notification_volume() {
+    volume=$(pamixer --get-volume)
+
+    if $(pamixer --get-mute); then
+	notify-send "Muted" -u low -i "volume-$1" -t 2000 -r 9993
+    else
+        notify-send "Volume: ${volume}%" -u low -r 9993 -h int:value:"$volume" -i "volume-$1" -t 2000
+    fi
+}
+
+case $1 in
+up)
+    pamixer -u
+    pamixer -i 10 --allow-boost
+    notification_volume $1
+;;
+down)
+    pamixer -u
+    pamixer -d 10 --allow-boost
+    notification_volume $1
+;;
+mute)
+    pamixer -t
+    notification_volume mute
+;;
+esac
+

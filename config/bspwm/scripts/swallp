@@ -1,0 +1,55 @@
+#!/bin/bash
+
+directories=(".backgrounds/" "Imágenes/" "Pictures/")
+dirpaths=()
+wallpaper_file=".wallpaper"
+
+empty_selected() {
+   if [[ "$1" = "" ]]; then
+      notify-send "Exit" -u normal -t 3000
+      exit 0
+   fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - 
+if [[ ! -f "$HOME/$wallpaper_file" ]]; then
+   touch "$HOME/$wallpaper_file"
+fi
+
+for directory in "${directories[@]}"; do
+   if [[ -d "$HOME/$directory" ]]; then
+      dirpaths+=("$HOME/$directory")
+   fi
+done
+
+dirpath_selected=$(printf "%s\n" "${dirpaths[@]}" | rofi -dmenu)
+
+empty_selected $dirpath_selected
+
+if [[ -z $(ls -A $dirpath_selected) ]]; then
+   notify-send "Directory Empty" "There are not files in $dirpath_selected" -u critical -t 5000
+   exit 0
+fi
+
+picture_selected=$(ls $dirpath_selected | while read A ; do  echo -en "$A\x00icon\x1f${dirpath_selected}$A\n" ; done | rofi -dmenu -theme $HOME/.config/rofi/swallp.rasi)
+picture_path="${dirpath_selected}${picture_selected}"
+
+empty_selected $picture_selected
+
+if command -v wal; then
+   change_selected=$(echo -e "Terminal and wallpaper\nTerminal colors\nWallpaper" | rofi -p "What do you want to change?" -dmenu)
+
+   empty_selected $change_selected
+
+   if [ "$change_selected" = "Terminal and wallpaper" ]; then
+      wal -i $picture_path -n -q
+   elif [ "$change_selected" = "Terminal colors" ]; then
+      wal -i $picture_path -n -q
+      exit 0
+   fi
+fi
+
+echo $picture_path > "$HOME/$wallpaper_file"
+
+feh --bg-fill $picture_path
+

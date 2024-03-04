@@ -1,0 +1,16 @@
+#!/bin/bash
+
+notification_brighness() {
+	percentage_brightness=$(($(brightnessctl get) * 100 / $(brightnessctl max)))
+
+	notify-send "Brightness: $percentage_brightness%" -u low -r 9990 -h int:value:"$percentage_brightness" -i brightness -t 1000
+}
+
+if [[ "$1" -eq 1 ]]; then
+	brightnessctl set +10%
+else
+	brightnessctl set 10%-
+fi
+
+notification_brighness
+

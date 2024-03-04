@@ -1,0 +1,64 @@
+* {
+    bg:  #000000DD;
+    bg-inputbar: #131313;
+    fg: #484848;
+    fg-alt: #FFFFFF;
+}
+
+window {
+   background-color: @bg;
+   fullscreen: true;
+   padding: 1em;
+   border: 0;
+}
+mainbox {
+   background-color: transparent;
+   padding:  10px;
+   children: [inputbar, listview];
+}
+inputbar {
+   background-color: @bg-inputbar;
+   padding:  10px;
+   spacing:  12px;
+   border:   0px;
+   children: [icon-search, entry];
+}
+icon-search {
+   expand: false;
+   filename: "search";
+   vertical-align: 0.5;
+   background-color: transparent;
+}
+entry {
+   background-color: transparent;
+   text-color: @fg-alt;
+}
+listview {
+   background-color: transparent;
+   columns: 6;
+   padding: 10px;
+   fixed-columns: true;
+}
+element, element-text, element-icon {
+   background-color: transparent;
+   cursor: pointer;
+}
+element {
+   spacing: 10px;
+   orientation: vertical;
+   border-radius: 5px;
+}
+element.selected.normal {
+   background-color: @bg-inputbar;
+   text-color: @bg;
+}
+element-icon {
+   expand: true;
+   size: 10em;
+}
+element-text {
+   text-color: @fg;
+   horizontal-align: 0.5;
+}
+
+/* vim:ft=css
