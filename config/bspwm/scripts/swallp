@@ -33,6 +33,13 @@ fi
 
 picture_selected=$(ls $dirpath_selected | while read A ; do  echo -en "$A\x00icon\x1f${dirpath_selected}$A\n" ; done | rofi -dmenu -theme $HOME/.config/rofi/swallp.rasi)
 picture_path="${dirpath_selected}${picture_selected}"
+picture_new_path="${dirpath_selected}${picture_selected// /-}"
+
+if [ "$picture_path" != "$picture_new_path" ]; then
+   mv "$picture_path" "$picture_new_path"
+
+   picture_path="${picture_new_path}"
+fi
 
 empty_selected $picture_selected
 

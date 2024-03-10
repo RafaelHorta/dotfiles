@@ -19,7 +19,7 @@
 * lightdm (opcional)
 * betterlockscreen (opcional), xautolock
 * flameshot
-* neofetch
+* neofetch [Theme](https://github.com/Chick2D/neofetch-themes)
 
 ### Menus
 Menus are displayed with Rofi.
