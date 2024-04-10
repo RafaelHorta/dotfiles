@@ -1,0 +1,37 @@
+* {
+    bg:  #000000DD;
+    bg-selected: #797979;
+    fg: #FFFFFF;
+    font: "Hack Nerd Fonts Mono 35";
+}
+
+window {
+   background-color: @bg;
+   border: 0;
+}
+mainbox {
+   background-color: transparent;
+   padding: 0px 10px;
+   children: [listview];
+}
+listview {
+   background-color: transparent;
+   layout: horizontal;
+   width: 100%;
+}
+element, element-text {
+   background-color: transparent;
+   cursor: pointer;
+}
+element {
+   padding: 40px;
+   children: [element-text];
+}
+element.selected.normal {
+   background-color: @bg-selected;
+}
+element-text {
+   text-color: @fg;
+}
+
+/* vim:ft=css

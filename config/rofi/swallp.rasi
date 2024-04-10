@@ -1,5 +1,12 @@
+configuration {
+   modi: "drun";
+   show-icons: true;
+   drun-display-format: "{name}";
+   font: "Hack Nerd Font Propo 10";
+}
+
 * {
-    bg:  #000000DD;
+    bg:  #000000BB;
     bg-inputbar: #131313;
     fg: #484848;
     fg-alt: #FFFFFF;
@@ -7,9 +14,11 @@
 
 window {
    background-color: @bg;
-   fullscreen: true;
+   fullscreen: false;
+   width: 100%;
    padding: 1em;
-   border: 0;
+   border: 0px;
+   spacing: 0px;
 }
 mainbox {
    background-color: transparent;
@@ -36,8 +45,11 @@ entry {
 listview {
    background-color: transparent;
    columns: 6;
-   padding: 10px;
+   lines: 2;
+   padding: 5px;
+   fixed-height: true;
    fixed-columns: true;
+   scrollbar: false;
 }
 element, element-text, element-icon {
    background-color: transparent;
@@ -46,19 +58,21 @@ element, element-text, element-icon {
 element {
    spacing: 10px;
    orientation: vertical;
-   border-radius: 5px;
+   text-color: @fg;
+   padding: 10px;
 }
-element.selected.normal {
-   background-color: @bg-inputbar;
-   text-color: @bg;
+element selected.normal {
+   background-color: #181818;
+   text-color: @fg-alt;
 }
 element-icon {
-   expand: true;
-   size: 10em;
+   size: 15em;
+   text-color: inherit;
 }
 element-text {
-   text-color: @fg;
+   text-color: inherit;
    horizontal-align: 0.5;
+   vertical-align: 0.5;
 }
 
 /* vim:ft=css
