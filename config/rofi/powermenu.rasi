@@ -17,7 +17,6 @@ mainbox {
 listview {
    background-color: transparent;
    layout: horizontal;
-   width: 100%;
 }
 element, element-text {
    background-color: transparent;

@@ -1,14 +1,14 @@
 #! /bin/sh
 
-chosen=$(printf "  Power Off\n  Restart\n  Suspend\n  Hibernate\n󰗽  Log Out\n  Lock" | rofi -dmenu -i -p "")
+chosen=$(printf "\n\n\n\n󰗽\n" | rofi -dmenu -i -p "" -theme $HOME/.config/rofi/powermenu.rasi)
 
 case "$chosen" in
-   "  Power Off") sudo poweroff ;;
-   "  Restart") sudo reboot ;;
-   "  Suspend") systemctl suspend-then-hibernate ;;
-   "  Hibernate") systemctl hibernate ;;
-   "󰗽  Log Out") bspc quit ;;
-   "  Lock") betterlockscreen -l ;;
+   "") sudo poweroff ;;
+   "") sudo reboot ;;
+   "") systemctl suspend-then-hibernate ;;
+   "") systemctl hibernate ;;
+   "󰗽") bspc quit ;;
+   "") betterlockscreen -l ;;
    *) exit 1 ;;
 esac
 
