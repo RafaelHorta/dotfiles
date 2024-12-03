@@ -1,0 +1,67 @@
+configuration {
+   modi: "drun";
+   show-icons: true;
+   drun-display-format: "{name}";
+   font: "Hack Nerd Font Propo 10";
+}
+
+@import "colors.rasi"
+
+window {
+   background-color: @bg-opacity;
+   fullscreen: true;
+   padding: 10px;
+}
+mainbox, icon-search, entry, listview, element, element-text, element-icon {
+   background-color: transparent;
+}
+mainbox {
+   padding:  10px;
+   children: [ "inputbar", "listview" ];
+}
+inputbar {
+   background-color: @bg;
+   padding:  10px;
+   spacing:  12px;
+   border:   0px;
+   children: [ "icon-search", "entry" ];
+}
+icon-search {
+   expand: false;
+   filename: "search";
+   vertical-align: 0.5;
+}
+entry {
+   text-color: @fg-light;
+}
+listview {
+   columns: 4;
+   lines: 2;
+   padding: 5px;
+   fixed-height: true;
+   fixed-columns: true;
+   scrollbar: false;
+}
+element, element-text, element-icon {
+   cursor: pointer;
+}
+element {
+   spacing: 10px;
+   orientation: vertical;
+   text-color: @fg;
+   padding: 10px;
+}
+element selected.normal {
+   background-color: @fg;
+   text-color: @fg;
+}
+element-icon {
+   size: 15em;
+}
+element-text {
+   text-color: @fg-light;
+   horizontal-align: 0.5;
+   vertical-align: 0.5;
+}
+
+/* vim:ft=css

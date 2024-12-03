@@ -1,0 +1,61 @@
+@import "colors"
+
+window {
+    background-color: @bg-opacity;
+    border: 0;
+    width: 30%;
+    location: north;
+    y-offset: 20%;
+}
+mainbox, listview, prompt, entry, element, element-text {
+   background-color: transparent;
+}
+mainbox {
+   enabled: true;
+   padding: 0;
+   spacing: 10px;
+   children: [ "inputbar", "listview" ];
+}
+inputbar {
+   enabled: true;
+   background-color: @bg;
+   font: "Hack Nerd Fonts Mono 20";
+   children: [ "prompt", "entry" ];
+}
+listview {
+   enabled: true;
+   columns: 1;
+   lines: 10;
+   scrollbar: true;
+}
+scrollbar {
+   background-color: @bg;
+   handle-width: 2px;
+   handle-color: @color1;
+}
+prompt {
+   enabled: true;
+   background-color: @fg-light;
+   text-color: @bg;
+   padding: 5px;
+}
+entry {
+   enabled: true;
+   text-color: @fg-light;
+   padding: 5px;
+}
+element {
+   enabled: true;
+   padding: 5px;
+   children: [ "element-text" ];
+}
+element-text {
+   font: "Hack Nerd Fonts Mono 10";
+   text-color: @fg-light;
+   vertical-align: 0.5;
+}
+element.selected.normal {
+   background-color: @fg;
+}
+
+/* vim:ft=css

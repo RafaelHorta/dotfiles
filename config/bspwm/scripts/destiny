@@ -1,0 +1,228 @@
+#!/bin/bash
+
+#--- Variables ---
+flag_master=1
+THEME_MASTER="~/.config/rofi/destiny.rasi"
+THEME_PLAYING="~/.config/rofi/destiny_playing.rasi"
+
+#--- Functions ---
+#=== Validate MPD
+validate_mpd() {
+   local trying=3
+
+   while ! pgrep -x mpd > /dev/null && [ $trying -gt 0 ]; do
+      notify-send "MPD Disabled" "Initializing MPD" -u low -t 2000 -r "999$trying"
+      mpd ~/.config/mpd/mpd.conf &
+
+      if pgrep -x mpd > /dev/null; then
+         notify-send "MPD Enabled" "MPD is running" -u normal -t 3000 -r 9992
+         break
+      fi
+      
+      ((trying--))
+      sleep 1
+   done
+
+   if ! pgrep -x mpd > /dev/null && [ $trying -le 0 ]; then
+      notify-send "MPD Error" "Error initializing MPD" -u critical -t 5000 -r 9994
+      return 0
+   fi
+
+   return 1
+}
+
+#=== Check playlist to get track index
+_get_index_track() {
+   local playlist=$(mpc playlist -f '%position% -> %file%')
+   local flag=0
+
+   while IFS= read -r song; do
+      if [ "$1" = "$(echo "$song" | awk -F' -> ' '{print $2}')" ]; then
+         echo "$(echo "$song" | awk '{print $1}')"
+         flag=1
+         break
+      fi
+   done <<< "$playlist"
+
+   if [[ $flag -eq 1 ]]; then return 0; else return 1; fi 
+}
+
+#=== Menu to add and play song
+menu_add_play() {
+   local actions="󰌑 Return\n󰐒 Add all\n"
+   local listall_songs=$(mpc listall -f '%file%')
+   local song_selected=$(echo -e "$actions$listall_songs" | rofi -dmenu -p "󰲸 All Songs")
+
+   #<--- Validate actions
+   if [ "$song_selected" = "󰌑 Return" ] || [ -z "$song_selected" ]; then
+      menu_master
+      return
+   elif [ "$song_selected" = "󰐒 Add all" ]; then
+      mpc stop    # Stop play
+      mpc clear   # Clear playlist
+
+      notify-send "Clearing" "The playlist is being cleared" -u normal -t 5000 -r 9992
+      sleep 2
+      
+      mpc add ""  # Add all songs to the playlist
+
+      notify-send "Songs Added" "All songs were added to the playlist" -u normal -t 5000 -r 9992
+      sleep 1
+      mpc play # playing song
+      
+      return
+   fi
+
+   #--- Get track index
+   track_index=$(_get_index_track "$song_selected")
+   
+   if [ "$?" -eq 0 ]; then
+      mpc play "$track_index"
+   else
+      mpc add "$song_selected"
+
+      notify-send "Song Added" "\"$song_selected\" was added to the playlist" -u normal -t 5000 -r 9992
+      sleep 1
+      #--- Get track index
+      track_index=$(_get_index_track "$song_selected")
+      
+      if [ "$?" -eq 0 ]; then
+         mpc play "$track_index"
+      else
+         notify-send "Error" "Error playing \"$song_selected\"" -u critical -t 5000 -r 9994
+      fi
+   fi
+}
+
+#=== Menu to playlist
+menu_playlist() {
+   local actions="󰌑 Return\n Play random\n Clear playlist\n"
+   local playlist=$(mpc playlist -f '%position% - %file%')
+   local track_index=1
+
+   track=$(echo -e "$actions$playlist" | rofi -dmenu -p "󰐑 Playlist")
+
+   if [ "$track" = "󰌑 Return" ] || [ -z "$track" ]; then
+      menu_master
+      return
+   elif [ "$track" = " Play random" ]; then
+      if [ -n "$playlist"  ]; then
+         mpc play
+         notify-send "Playing" "Playing \"$(mpc play | head -n 1)\"" -u normal -t 5000 -r 9992
+      fi
+   elif [ "$track" = " Clear playlist" ]; then
+      mpc stop
+      mpc clear
+   else
+      track_index=$(echo "$track" | awk '{print $1}')
+
+      mpc play "$track_index"
+   fi
+
+   return 0
+}
+
+#--- General settings
+_settings() {
+   local settings_mpc=$(mpc status | tail -n 1)
+   local status_volume=$(echo "$settings_mpc" | awk -F'   ' '{print $1}')
+   local status_repeat=$(echo "$settings_mpc" | awk -F'   ' '{print $2}')
+   local status_random=$(echo "$settings_mpc" | awk -F'   ' '{print $3}')
+   local status_single=$(echo "$settings_mpc" | awk -F'   ' '{print $4}' | xargs)
+   local status_consume=$(echo "$settings_mpc" | awk -F'   ' '{print $5}')
+   #--- Rofi
+   local actions="󰌑 Return\n"
+   actions+=" Volume ($(echo "$status_volume" | awk -F':' '{print $2}' | xargs))\n"
+   actions+=" Random ($(echo "$status_random" | awk -F' ' '{print $2}'))\n"
+   actions+="󰑖 Repeat ($(echo "$status_repeat" | awk -F' ' '{print $2}'))\n"
+   actions+=" Single ($(echo "$status_single" | awk -F' ' '{print $2}'))\n"
+   actions+="󰐓 Consum ($(echo "$status_consume" | awk -F' ' '{print $2}'))"
+   local option=$(echo -e "$actions" | rofi -dmenu -p " Settings")
+   #---
+   local action="$(echo "$option" | awk -F' ' '{print $2}')"
+   local action_value="$(echo "$option" | awk -F' ' '{print $3}')"
+
+   case "$action" in
+      "Return")
+         menu_master
+         return
+      ;;
+      "Volume")
+         if [ "$action_value" = "(n/a)" ]; then
+            notify-send "Not Playing" "It needs to be playing to set the volume" -u normal -t 5000 -r 9992
+         else
+            local get_volume=$(rofi -dmenu -p "Set volume (%)")
+
+            if [[ "$get_volume" =~ ^[0-9]+$ ]]; then mpc volume "$get_volume"; fi
+         fi
+         ;;
+      "Random") if [ "$action_value" = "(off)" ]; then mpc random 1; else mpc random 0; fi ;;
+      "Repeat") if [ "$action_value" = "(off)" ]; then mpc repeat 1; else mpc repeat 0; fi ;;
+      "Single") if [ "$action_value" = "(off)" ]; then mpc single 1; else mpc single 0; fi ;;
+      "Consum") if [ "$action_value" = "(off)" ]; then mpc consume 1; else mpc consume 0; fi ;;
+      *)
+         return
+      ;;
+   esac
+
+   _settings
+   return
+}
+
+#=== Menu
+menu_master() {
+   local actions=""
+
+   if [ -n "$(mpc current)" ]; then actions+="\n" ; fi
+
+   actions+="󰲸\n󰐑\n\n󰿅"
+
+   local option=$(echo -e "$actions" | rofi -dmenu -p "Master Menu" -theme "$THEME_MASTER")
+
+   case "$option" in
+      "") return ;;
+      "󰲸") menu_add_play ;;
+      "󰐑") menu_playlist ;;
+      "") _settings ;;
+      *) flag_master=0 ;;
+   esac
+}
+
+#=== Master loop, actions, function, master
+master_of_masters() {
+   local actions="󰐑\n󰒮\n\n󰒭\n\n\n"
+   local track_current=$(mpc current -f "%file%")
+   local track_title=$(mpc current -f "%title%")
+
+   if [ -n "$track_current" ]; then
+      local track_paused=$(mpc status | grep -w "paused")
+
+      if [ -n "$track_paused" ]; then actions="${actions//}"; fi
+      if [ -n "$track_title" ]; then track_current="$track_title"; fi
+
+      local option=$(echo -e "$actions" | rofi -dmenu -p "$track_current" -theme "$THEME_PLAYING")
+
+      case "$option" in
+         "󰐑") menu_playlist ;;
+         "󰒭") mpc next ;;
+         "󰒮") mpc prev ;;
+         "") mpc pause ;;
+         "") mpc play ;;
+         "") mpc seek -10 ;;
+         "") mpc seek +10 ;;
+         "") mpc stop ;;
+         *) menu_master ;;
+      esac
+   else
+      menu_master
+   fi
+}
+
+#--- Init process
+validate_mpd
+if [ $? -eq 1 ]; then
+   while [ "$flag_master" -eq 1 ]; do
+      master_of_masters
+   done
+fi
+

@@ -1,0 +1,57 @@
+@import "colors.rasi"
+
+window {
+   location: center;
+   anchor: center;
+   fullscreen: false;
+   background-color: @bg-opacity;
+   border: 0;
+}
+mainbox, inputbar, listview, prompt, element, element-text {
+   background-color: transparent;
+}
+mainbox {
+   enabled: true;
+   padding: 20px;
+   spacing: 10px;
+   children: [ "inputbar", "listview" ];
+}
+inputbar {
+   enabled: true;
+   children: [ "prompt" ];
+}
+listview {
+   enabled: true;
+   columns: 7;
+   lines: 1;
+   cycle: true;
+   dynamic: true;
+   reverse: false;
+   layout: vertical;
+   fixed-height: true;
+   fixed-columns: true;
+   spacing: 5px;
+}
+prompt {
+   enabled: true;
+   font: "Hack Nerd Fonts Mono 12";
+   padding: 12px;
+   text-color: @color1;
+}
+element {
+   enabled: true;
+   padding: 20px;
+   background-color: @bg;
+   children: [ "element-text" ];
+}
+element-text {
+   font: "Hack Nerd Fonts Mono 28";
+   vertical-align: 0.5;
+   horizontal-align: 0.5;
+   text-color: @fg-light;
+}
+element.selected.normal {
+   background-color: @fg;
+}
+
+/* vim:ft=css

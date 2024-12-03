@@ -1,0 +1,7 @@
+* {
+   bg: #121212;
+   bg-opacity: #121212DD;
+   fg: #4C4D4C;
+   fg-light: #cacaca;
+   color1: #8d8d8d;
+}

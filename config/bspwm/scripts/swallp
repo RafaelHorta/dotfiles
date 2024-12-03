@@ -1,0 +1,100 @@
+#!/bin/bash
+
+DIR_WALLPAPER="$HOME/.backgrounds"
+FILE_WALLPAPER="$HOME/.wallpaper"
+rofi_file_colors="$HOME/.config/rofi/colors.rasi"
+
+#--- Rofi colors
+change_colors_rofi() {
+   sleep 1
+
+   local get_colors="$HOME/.cache/wal/colors"
+   #--- Colors
+   local background=$(head -n 1 "$get_colors")
+   local background_opacity="$(echo "$background")DD"
+   local foreground=$(sed -n '2p' "$get_colors")
+   local foreground_light=$(sed -n '8p' "$get_colors")
+   local color1=$(sed -n '9p' "$get_colors")
+
+   cat <<EOF > "$rofi_file_colors"
+* {
+   bg: $background;
+   bg-opacity: $background_opacity;
+   fg: $foreground;
+   fg-light: $foreground_light;
+   color1: $color1;
+}
+EOF
+}
+
+#--- Not response
+empty_selected() {
+   if [[ "$1" = "" ]]; then
+      notify-send "Exit" -u normal -t 3000
+      exit 0
+   fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - 
+if [[ ! -f "$FILE_WALLPAPER" ]]; then
+   touch "$FILE_WALLPAPER"
+fi
+
+get_wallpapers=$(ls -A "$DIR_WALLPAPER")
+
+if [ -z "$get_wallpapers" ]; then
+   notify-send "Directory Empty" "There are not files in $DIR_WALLPAPER" -u critical -t 5000
+   exit 0
+fi
+
+picture_selected=$(
+   while read -r picture; do
+      echo -en "$picture\x00icon\x1f${DIR_WALLPAPER}/$picture\n"
+   done <<< "$get_wallpapers" | rofi -dmenu -theme "$HOME/.config/rofi/swallp.rasi"
+)
+
+empty_selected $picture_selected
+
+picture_path="$DIR_WALLPAPER/$picture_selected"
+picture_new_path="$DIR_WALLPAPER/${picture_selected// /-}"
+
+if [ "$picture_path" != "$picture_new_path" ]; then
+   mv "$picture_path" "$picture_new_path"
+
+   picture_path="$picture_new_path"
+fi
+#---
+if command -v wal; then
+   change_selected=$(echo -e "Terminal and wallpaper\nTerminal colors\nWallpaper" | rofi -p "What do you want to change?" -dmenu)
+
+   empty_selected "$change_selected"
+
+   if [ "$change_selected" = "Terminal and wallpaper" ] || [ "$change_selected" = "Wallpaper" ]; then
+      echo $picture_path > "$FILE_WALLPAPER"
+      feh --bg-fill $picture_path
+   fi
+
+   if [ "$change_selected" = "Terminal and wallpaper" ]; then
+      wal -i $picture_path -n -q
+   elif [ "$change_selected" = "Terminal colors" ]; then
+      wal -i $picture_path -n -q
+   fi
+
+   # Change rofi colors
+   change_colors_rofi
+
+else
+   if [ ! -e "$rofi_file_colors" ]; then
+      
+      cat <<EOF > "$rofi_file_colors"
+* {
+   bg: #000000;
+   bg-opacity: #000000DD;
+   fg: #484848;
+   fg-light: #FFFFFF;
+   color1: #797979;
+}
+EOF
+   fi
+fi
+

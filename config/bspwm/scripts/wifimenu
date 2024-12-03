@@ -1,0 +1,40 @@
+#!/bin/bash
+
+notify-send "Getting list of available Wi-Fi networks..." -u low -t 5000
+
+# Get a list of available wifi connections and morph it into a nice-looking list
+wifi_list=$(nmcli -t -f SECURITY,SSID device wifi list | sed -E 's/WPA[0-9] WPA[0-9]|WPA[0-9]//g' | sed -E 's/^:/󰌿:/g' | sed -n '/^:[^[:space:]]/p' | sed -E 's/:/ /g')
+status_connected=$(nmcli -t -f WIFI g)
+
+if [[ "$status_connected" =~ "enabled" || "$status_connected" =~ "activado" ]]; then
+   toggle="󰖪  Disable WiFi"
+elif [[ "$status_connected" =~ "disabled" || "$status_connected" =~ "desactivado" ]]; then
+   toggle="󰖩  Enable WiFi"
+fi
+
+current_connection=$(nmcli -t -f NAME connection show --active | head -n 1)
+chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "$current_connection" -theme "~/.config/rofi/wifi.rasi")
+chosen_id=$(echo "${chosen_network:2}" | xargs)
+
+if [ "$chosen_network" = "󰖩  Enable WiFi" ]; then
+   nmcli radio wifi on
+   notify-send "Enabled" "WiFi was enabled" -u low
+elif [ "$chosen_network" = "󰖪  Disable WiFi" ]; then
+   nmcli radio wifi off
+   notify-send "Disabled" "WiFi was disabled" -u normal
+else
+   success_message="You are now connected to the WiFi network \"$chosen_id\"."
+   saved_connections=$(nmcli -g NAME connection)
+
+   if [[ $(echo "$saved_connections" | grep -w "$chosen_id") = "$chosen_id" ]]; then
+      nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
+
+   else
+      if [[ "$chosen_network" =~ "" ]]; then
+         wifi_password=$(rofi -dmenu -p " password: " -theme "~/.config/rofi/wifi_password.rasi")
+      fi
+
+      nmcli device wifi connect "$chosen_id" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
+   fi
+fi
+

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+pkill dunst
+pkill picom
+pkill xautolock
+
+pgrep -x sxhkd > /dev/null || sxhkd &
+pgrep -x picom > /dev/null || picom -f --daemon --experimental-backend --config ~/.config/picom/picom.conf &
+pgrep -x feh > /dev/null || feh --bg-fill $(cat "${HOME}/.wallpaper") &
+dunst &
+xautolock -time 15 -locker "betterlockscreen -l" -notify 30 -notifier "notify-send 'Lock' 'Locking screen in 30 seconds'" -killtime 10 -killer "systemctl suspend" &
+xrdb -merge ~/.cache/wal/colors.Xresources
+~/.config/polybar/launch.sh &
+
+bspc monitor -d 1 2 3 4 5
+
+bspc config border_width         0
+bspc config window_gap           7
+
+bspc config split_ratio          0.52
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+
+bspc rule -a Brave-browser desktop='^2' follow=on
+bspc rule -a Code desktop='^3' follow=on
+bspc rule -a TelegramDesktop desktop='^5' follow=on
+
