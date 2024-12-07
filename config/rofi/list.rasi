@@ -46,7 +46,7 @@ entry {
 }
 element {
    enabled: true;
-   padding: 5px;
+   padding: 10px;
    children: [ "element-text" ];
 }
 element-text {

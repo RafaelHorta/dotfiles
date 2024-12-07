@@ -4,6 +4,7 @@
 flag_master=1
 THEME_MASTER="~/.config/rofi/destiny.rasi"
 THEME_PLAYING="~/.config/rofi/destiny_playing.rasi"
+THEME_LIST="~/.config/rofi/list.rasi"
 
 #--- Functions ---
 #=== Validate MPD
@@ -51,7 +52,7 @@ _get_index_track() {
 menu_add_play() {
    local actions="󰌑 Return\n󰐒 Add all\n"
    local listall_songs=$(mpc listall -f '%file%')
-   local song_selected=$(echo -e "$actions$listall_songs" | rofi -dmenu -p "󰲸 All Songs")
+   local song_selected=$(echo -e "$actions$listall_songs" | rofi -dmenu -p "󰲸 All Songs" -theme "$THEME_LIST")
 
    #<--- Validate actions
    if [ "$song_selected" = "󰌑 Return" ] || [ -z "$song_selected" ]; then
@@ -100,7 +101,7 @@ menu_playlist() {
    local playlist=$(mpc playlist -f '%position% - %file%')
    local track_index=1
 
-   track=$(echo -e "$actions$playlist" | rofi -dmenu -p "󰐑 Playlist")
+   track=$(echo -e "$actions$playlist" | rofi -dmenu -p "󰐑 Playlist" -theme "$THEME_LIST")
 
    if [ "$track" = "󰌑 Return" ] || [ -z "$track" ]; then
       menu_master

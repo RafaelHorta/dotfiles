@@ -13,7 +13,7 @@ elif [[ "$status_connected" =~ "disabled" || "$status_connected" =~ "desactivado
 fi
 
 current_connection=$(nmcli -t -f NAME connection show --active | head -n 1)
-chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "$current_connection" -theme "~/.config/rofi/wifi.rasi")
+chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "$current_connection" -theme "~/.config/rofi/list.rasi")
 chosen_id=$(echo "${chosen_network:2}" | xargs)
 
 if [ "$chosen_network" = "󰖩  Enable WiFi" ]; then
